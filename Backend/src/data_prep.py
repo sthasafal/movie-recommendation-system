@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt  # corrected import
+import matplotlib.pyplot as plt
 import os
 
 ratings = pd.read_csv(

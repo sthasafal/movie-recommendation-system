@@ -4,11 +4,9 @@ import pandas as pd
 import os
 import time
 
-# ---- Load environment variables ----
 load_dotenv()
 API_KEY = os.getenv("TMDB_API_KEY")
 
-# ---- Setup TMDb API ----
 tmdb = TMDb()
 tmdb.api_key = API_KEY
 tmdb.language = 'en'
