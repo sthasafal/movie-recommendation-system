@@ -7,8 +7,9 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 
-FINAL_MOVIES = os.path.join(DATA_DIR, "final_movies.csv")
-FINAL_RATINGS = os.path.join(DATA_DIR, "final_ratings.csv")
+PROCESSED_DIR = os.path.join(DATA_DIR, "processed")
+FINAL_MOVIES = os.path.join(PROCESSED_DIR, "final_movies.csv")
+FINAL_RATINGS = os.path.join(PROCESSED_DIR, "final_ratings.csv")
 
 OUTPUT_MOVIE_POP = os.path.join(DATA_DIR, "baseline_movie_popularity.csv")
 OUTPUT_USER_AVG = os.path.join(DATA_DIR, "baseline_user_avg.csv")

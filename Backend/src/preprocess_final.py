@@ -10,9 +10,9 @@ MOVIELENS_ITEM = os.path.join(DATA_DIR, "u.item")
 MOVIELENS_RATINGS = os.path.join(DATA_DIR, "u.data")
 TMDB_FILE = os.path.join(DATA_DIR, "movies_with_tmdb.csv")
 
-FINAL_MOVIES = os.path.join(DATA_DIR, "final_movies.csv")
-FINAL_RATINGS = os.path.join(DATA_DIR, "final_ratings.csv")
-
+PROCESSED_DIR = os.path.join(DATA_DIR, "processed")
+FINAL_MOVIES = os.path.join(PROCESSED_DIR, "final_movies.csv")
+FINAL_RATINGS = os.path.join(PROCESSED_DIR, "final_ratings.csv")
 
 # LOAD MOVIELENS MOVIE METADATA
 def load_movielens_movies():
