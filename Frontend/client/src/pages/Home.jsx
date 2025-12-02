@@ -1,10 +1,20 @@
+import Hero from "../components/Hero";
+import MovieRow from "../components/MovieRow";
+
 export default function Home() {
+  // Temporary static data before connecting backend
+  const sampleMovies = [
+    { id: 1, title: "Movie 1", poster_path: "/kqjL17yufvn9OVLyXYpvtyrFfak.jpg" },
+    { id: 2, title: "Movie 2", poster_path: "/rCzpDGLbOoPwLjy3OAm5NUPOTrC.jpg" },
+    { id: 3, title: "Movie 3", poster_path: "/mW6hFjlH5OFQvSW2tNpjj9i7nBg.jpg" },
+  ];
+
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4">Welcome!</h1>
-      <p className="text-gray-300">
-        Browse recommended movies and explore similar films.
-      </p>
+    <div>
+      <Hero />
+      <MovieRow title="Trending Now" movies={sampleMovies} />
+      <MovieRow title="Top Picks For You" movies={sampleMovies} />
+      <MovieRow title="New Releases" movies={sampleMovies} />
     </div>
   );
 }

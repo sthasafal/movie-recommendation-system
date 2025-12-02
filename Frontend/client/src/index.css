@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+body {
+  background-color: #141414; /* Netflix black */
+  color: white;
+  font-family: 'Inter', sans-serif;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
