@@ -1,14 +1,17 @@
 import numpy as np
 import pandas as pd
 import joblib
+from pathlib import Path
 from sklearn.decomposition import TruncatedSVD
 
-from ML_Models.utils.shared_paths import FINAL_RATINGS
+from ML_Models.utils.shared_paths import FINAL_RATINGS, SVD_DIR
+
+SVD_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def build_matrix(df):
     pivot = df.pivot(index="user_id", columns="movie_id", values="rating").fillna(0)
-    return pivot.values, pivot.index, pivot.columns
+    return pivot.values, pivot.index.to_numpy(), pivot.columns.to_numpy()
 
 
 def train_svd(n_components=20):
@@ -24,9 +27,11 @@ def train_svd(n_components=20):
     item_factors = svd.components_.T
 
     print("Saving model + embeddings...")
-    joblib.dump(svd, "svd_model.pkl")
-    np.save("user_embeddings.npy", user_factors)
-    np.save("item_embeddings.npy", item_factors)
+    joblib.dump(svd, SVD_DIR / "svd_model.pkl")
+    np.save(SVD_DIR / "user_embeddings.npy", user_factors)
+    np.save(SVD_DIR / "item_embeddings.npy", item_factors)
+    np.save(SVD_DIR / "user_ids.npy", user_ids)
+    np.save(SVD_DIR / "movie_ids.npy", movie_ids)
 
     print("SVD training complete!")
 

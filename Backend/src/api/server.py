@@ -4,6 +4,9 @@ from api.routes.recommend_routes import router as recommend_router
 from api.routes.movie_routes import router as movie_router
 from api.routes.health_check import router as health_router
 
+import sys, os
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
+
 app = FastAPI(title="Movie Recommendation API")
 
 # Allow frontend to connect

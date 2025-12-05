@@ -14,29 +14,33 @@ class HybridRecommender:
 
         # Load data
         self.movies, self.ratings = load_data()
-        self.matrix = create_user_movie_matrix(self.ratings)
+        base_matrix = create_user_movie_matrix(self.ratings)
 
-        # Load all models
-        print("Loading Collaborative Filtering Models...")
-        self.mem_cf = MemoryCF(self.matrix)
+        # Load all models (pre-trained artifacts)
+        print("Loading Collaborative Filtering Models (KNN similarities)...")
+        self.mem_cf = MemoryCF(base_matrix)
 
-        print("Loading SVD Model...")
-        self.svd_cf = SVD_CF(n_components=20)
-        self.svd_cf.fit(self.matrix)
+        print("Loading SVD Model (pre-trained)...")
+        self.svd_cf = SVD_CF()
 
-        print("Loading Content-Based Model...")
+        print("Loading Content-Based Model (pre-trained)...")
         self.cb = ContentBasedRecommender()
+
+        # Align matrix columns to SVD/movie ids for scoring
+        self.matrix = base_matrix.reindex(
+            index=self.svd_cf.user_ids, columns=self.svd_cf.movie_ids
+        )
 
     # Hybrid Score for a single (user, movie)
     def hybrid_score(self, user_id, movie_id):
         # Collaborative Filtering score (SVD)
-        cf_score = self.svd_cf.predict(user_id, movie_id, self.matrix)
+        cf_score = self.svd_cf.predict(user_id, movie_id)
         if cf_score is None:
             cf_score = 0
 
         # Content score
         cb_score = 0
-        if movie_id in self.movies["movie_id"].values:
+        if movie_id in self.cb.id_to_idx:
             similar_movies = self.cb.recommend_similar(movie_id, top_n=10)
             if similar_movies is not None:
                 cb_score = 1  # simple signal meaning "this movie has similar content"
@@ -47,9 +51,13 @@ class HybridRecommender:
 
     # Top-N Hybrid Recommendations
     def recommend(self, user_id, top_n=10):
+        if user_id not in self.svd_cf.user_index:
+            return []
+
         predictions = {}
 
-        for movie_id in self.matrix.columns:
+        for movie_id in self.svd_cf.movie_ids:
+            # respect existing ratings
             if np.isnan(self.matrix.loc[user_id, movie_id]):
                 predictions[movie_id] = self.hybrid_score(user_id, movie_id)
 
