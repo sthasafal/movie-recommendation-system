@@ -1,21 +1,11 @@
-import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
-import Movie from "./pages/Movie";
-import Recommendations from "./pages/Recommendations";
 
-function App() {
+export default function App() {
   return (
-    <div className="bg-gray-900 min-h-screen text-white">
+    <div>
       <Navbar />
-
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/movie/:id" element={<Movie />} />
-        <Route path="/recommend" element={<Recommendations />} />
-      </Routes>
+      <Home />
     </div>
   );
 }
-
-export default App;
