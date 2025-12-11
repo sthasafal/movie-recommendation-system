@@ -56,22 +56,22 @@ def train_content():
     np.save(CONTENT_DIR / "movie_ids.npy", movies["movie_id"].to_numpy())
 
     
-    movie_ids = movies["movie_id"].to_numpy()
-    print("\n=== MOVIE IDS PREVIEW ===")
-    print(movie_ids[:20])
-    print("Min:", movie_ids.min())
-    print("Max:", movie_ids.max())
-    print("Unique:", len(np.unique(movie_ids)))
-    print("Total count:", movie_ids.size)
+    # movie_ids = movies["movie_id"].to_numpy()
+    # print("\n=== MOVIE IDS PREVIEW ===")
+    # print(movie_ids[:20])
+    # print("Min:", movie_ids.min())
+    # print("Max:", movie_ids.max())
+    # print("Unique:", len(np.unique(movie_ids)))
+    # print("Total count:", movie_ids.size)
 
-    print("\n=== COSINE SIM SHAPE ===")
-    print(cosine_sim.shape)
-    print("First 5×5:")
-    print(cosine_sim[:5, :5])
+    # print("\n=== COSINE SIM SHAPE ===")
+    # print(cosine_sim.shape)
+    # print("First 5×5:")
+    # print(cosine_sim[:5, :5])
 
-    print("\n=== TF-IDF MATRIX SHAPE ===")
-    print(tfidf_matrix.shape)
-    print(tfidf_matrix)
+    # print("\n=== TF-IDF MATRIX SHAPE ===")
+    # print(tfidf_matrix.shape)
+    # print(tfidf_matrix)
 
     print("Content model training complete!")
 
