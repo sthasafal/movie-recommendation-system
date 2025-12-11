@@ -1,9 +1,11 @@
+import React from 'react';
+
 export default function Loading() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0b0b0f] text-white">
-      <div className="flex items-center space-x-3">
-        <div className="h-10 w-10 rounded-full border-2 border-red-600 border-t-transparent animate-spin" />
-        <p className="text-lg tracking-wide">Loading</p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-900">
+      <div className="text-center">
+        <div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-white text-lg">Loading your recommendations...</p>
       </div>
     </div>
   );
