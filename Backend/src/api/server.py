@@ -1,11 +1,18 @@
+import sys
+from pathlib import Path
+
+# Ensure project + backend src are on sys.path before importing routers
+SRC_DIR = Path(__file__).resolve().parents[1]  # Backend/src
+ROOT_DIR = SRC_DIR.parent.parent
+for path in (SRC_DIR, ROOT_DIR):
+    if str(path) not in sys.path:
+        sys.path.insert(0, str(path))
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routes.recommend_routes import router as recommend_router
-from api.routes.movie_routes import router as movie_router
-from api.routes.health_check import router as health_router
-
-import sys, os
-sys.path.append(os.path.abspath(os.path.join(os.getcwd(), "..")))
+from .routes.recommend_routes import router as recommend_router
+from .routes.movie_routes import router as movie_router
+from .routes.health_check import router as health_router
 
 app = FastAPI(title="Movie Recommendation API")
 

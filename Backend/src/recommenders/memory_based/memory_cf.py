@@ -60,4 +60,5 @@ class MemoryCF:
             if np.isnan(self.matrix.loc[user_id, movie_id]):
                 predictions[movie_id] = self.predict_user_user(user_id, movie_id)
 
-        return sorted(predictions.items(), key=lambda x: x[1], reverse=True)[:top_n]
+        filtered = [(mid, score) for mid, score in predictions.items() if score is not None]
+        return sorted(filtered, key=lambda x: x[1], reverse=True)[:top_n]

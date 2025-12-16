@@ -56,6 +56,19 @@ class HybridRecommender:
 
         predictions = {}
 
+        # quick helper to normalize non-JSON-safe values
+        def _safe(val):
+            try:
+                if val is None:
+                    return None
+                if isinstance(val, float) and np.isnan(val):
+                    return None
+                if hasattr(val, "item"):
+                    return val.item()
+            except Exception:
+                return None
+            return val
+
         for movie_id in self.svd_cf.movie_ids:
             # respect existing ratings
             if np.isnan(self.matrix.loc[user_id, movie_id]):
@@ -70,10 +83,10 @@ class HybridRecommender:
             results.append({
                 "movie_id": int(movie_id),
                 "title": movie_row["title"],
-                "clean_title": movie_row["clean_title"],
+                "clean_title": _safe(movie_row.get("clean_title")),
                 "score": float(score),
-                "poster_path": movie_row["poster_path"],
-                "vote_average": float(movie_row["vote_average"])
+                "poster_path": _safe(movie_row.get("poster_path")),
+                "vote_average": _safe(movie_row.get("vote_average")),
             })
 
         return results
