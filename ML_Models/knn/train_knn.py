@@ -3,6 +3,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from scipy.sparse import csr_matrix
 from sklearn.metrics.pairwise import cosine_similarity
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -14,29 +15,35 @@ from ML_Models.utils.shared_paths import FINAL_RATINGS, KNN_DIR
 KNN_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def build_matrix(df):
-    pivot = df.pivot(index="user_id", columns="movie_id", values="rating").fillna(0)
-    return pivot.values, pivot.index.to_numpy(), pivot.columns.to_numpy()
-
-
-def train_knn():
+def train_knn(top_k=50):
     print("Loading rating data...")
-    df = pd.read_csv(FINAL_RATINGS)
+    ratings = pd.read_csv(FINAL_RATINGS)
 
-    print("Building matrix...")
-    matrix, user_ids, movie_ids = build_matrix(df)
+    print("Encoding user and movie IDs...")
+    user_cat = ratings["user_id"].astype("category")
+    movie_cat = ratings["movie_id"].astype("category")
 
-    print("Computing user-user similarity...")
-    user_sim = cosine_similarity(matrix)
+    user_idx = user_cat.cat.codes.to_numpy()
+    movie_idx = movie_cat.cat.codes.to_numpy()
+    values = ratings["rating"].to_numpy()
 
-    print("Computing item-item similarity...")
-    item_sim = cosine_similarity(matrix.T)
+    print("Building sparse user–movie matrix...")
+    matrix = csr_matrix(
+        (values, (user_idx, movie_idx)),
+        shape=(user_cat.cat.categories.size, movie_cat.cat.categories.size)
+    )
 
-    print("Saving similarity matrices...")
-    np.save(KNN_DIR / "user_similarity.npy", user_sim)
-    np.save(KNN_DIR / "item_similarity.npy", item_sim)
-    np.save(KNN_DIR / "user_ids.npy", user_ids)
-    np.save(KNN_DIR / "movie_ids.npy", movie_ids)
+    print("Computing item–item cosine similarity (Top-K only)...")
+    item_matrix = matrix.T  # items × users
+    sim = cosine_similarity(item_matrix, dense_output=False)
+
+    knn_indices = np.argsort(sim.toarray(), axis=1)[:, -top_k-1:-1]
+    knn_scores = np.take_along_axis(sim.toarray(), knn_indices, axis=1)
+
+    print("Saving KNN artifacts...")
+    np.save(KNN_DIR / "item_knn_indices.npy", knn_indices)
+    np.save(KNN_DIR / "item_knn_scores.npy", knn_scores)
+    np.save(KNN_DIR / "movie_ids.npy", movie_cat.cat.categories.to_numpy())
 
     print("KNN training complete!")
 

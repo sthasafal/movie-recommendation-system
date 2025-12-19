@@ -24,7 +24,7 @@ def main():
     run("ML_Models.content_based.train_content")
 
     print("Training KNN similarities...")
-    run("ML_Models.knn.train_knn")
+    # run("ML_Models.knn.train_knn")
 
     print("All models trained successfully!")
 
