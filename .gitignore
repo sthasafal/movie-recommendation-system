@@ -246,4 +246,10 @@ node_modules/
 tailwindcss*
 *.exe
 
+# Datasets
+Backend/data/
+Backend/data/ml-32m/
+Backend/data/**/*.csv
+
+
 
