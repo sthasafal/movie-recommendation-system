@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 from ML_Models.content_based.load_content import load_content_model
 from recommenders.utils.paths import FINAL_MOVIES
 
@@ -8,7 +9,11 @@ from recommenders.utils.paths import FINAL_MOVIES
 class ContentBasedRecommender:
     def __init__(self):
         print("Loading movie metadata...")
-        self.movies = pd.read_csv(FINAL_MOVIES)
+        self.movies = pd.read_csv(
+            FINAL_MOVIES,
+            low_memory=False,
+            dtype={"poster_path": "string", "overview": "string"},
+        )
 
         print("Loading pre-trained content model artifacts...")
         (
@@ -17,6 +22,11 @@ class ContentBasedRecommender:
             self.similarity,
             self.model_movie_ids,
         ) = load_content_model()
+
+        if self.similarity is not None and self.similarity.shape[0] != len(self.model_movie_ids):
+            # Mismatched legacy similarity matrix; ignore it
+            print("Content similarity matrix shape mismatch; falling back to on-the-fly similarity.")
+            self.similarity = None
 
         # Keep only rows present in the trained model order
         self.movies = (
@@ -35,9 +45,15 @@ class ContentBasedRecommender:
 
         idx = self.id_to_idx[movie_id]
 
-        sim_scores = list(enumerate(self.similarity[idx]))
-        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+        if self.similarity is not None:
+            sim_scores = list(enumerate(self.similarity[idx]))
+        else:
+            # Compute similarity on the fly to avoid stale or missing precomputed matrices
+            row_vec = self.tfidf_matrix[idx]
+            sims = cosine_similarity(row_vec, self.tfidf_matrix, dense_output=False).toarray().ravel()
+            sim_scores = list(enumerate(sims))
 
+        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
         top_indices = [i[0] for i in sim_scores[1:top_n + 1]]
 
         return self.movies.iloc[top_indices][[
