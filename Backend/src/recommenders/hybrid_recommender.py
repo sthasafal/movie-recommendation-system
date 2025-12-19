@@ -1,9 +1,10 @@
 from recommenders.recommend_utils import normalize_scores
-from recommenders.memory_based.memory_cf import MemoryCF
+#from recommenders.memory_based.memory_cf import MemoryCF
 from recommenders.model_based.svd_cf import SVD_CF
 from recommenders.content_based.content_based import ContentBasedRecommender
 from recommenders.utils.matrix_builder import load_data, create_user_movie_matrix
 import numpy as np
+import pandas as pd
 
 
 class HybridRecommender:
@@ -18,7 +19,7 @@ class HybridRecommender:
 
         # Load all models (pre-trained artifacts)
         print("Loading Collaborative Filtering Models (KNN similarities)...")
-        self.mem_cf = MemoryCF(base_matrix)
+        # self.mem_cf = MemoryCF(base_matrix)
 
         print("Loading SVD Model (pre-trained)...")
         self.svd_cf = SVD_CF()
@@ -39,11 +40,7 @@ class HybridRecommender:
             cf_score = 0
 
         # Content score
-        cb_score = 0
-        if movie_id in self.cb.id_to_idx:
-            similar_movies = self.cb.recommend_similar(movie_id, top_n=10)
-            if similar_movies is not None:
-                cb_score = 1  # simple signal meaning "this movie has similar content"
+        cb_score = 1 if movie_id in self.cb.id_to_idx else 0
 
         # Weighted hybrid score
         final_score = (self.w_cf * cf_score) + (self.w_content * cb_score)
@@ -71,7 +68,8 @@ class HybridRecommender:
 
         for movie_id in self.svd_cf.movie_ids:
             # respect existing ratings
-            if np.isnan(self.matrix.loc[user_id, movie_id]):
+            val = self.matrix.loc[user_id, movie_id]
+            if pd.isna(val) or val == 0:
                 predictions[movie_id] = self.hybrid_score(user_id, movie_id)
 
         # Sort by score (descending)
