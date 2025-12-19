@@ -1,60 +1,67 @@
 # Movie Recommendation System
 
-Complete stack: FastAPI backend + pre-trained ML models (MovieLens 100K) + React frontend.
+FastAPI backend + pre-trained ML models + React frontend. Supports legacy MovieLens 100K and newer MovieLens datasets (20M/25M/32M style).
 
 ## Prerequisites
 - Python 3.11+ (virtualenv recommended)
-- Node 18+ (for Vite/React)
-- TMDB images are referenced via `poster_path` (no key required for precomputed paths)
+- Node 18+
 
-## 1) Backend setup
+## Backend setup
 1. Create/activate venv  
    `python -m venv .venv`  
    `.\.venv\Scripts\Activate`
-2. Install Python deps  
+2. Install deps  
    `pip install -r Backend/requirements.txt`
-3. (Optional) Retrain models if needed (uses MovieLens data already in `Backend/data/processed`)  
-   `python -m ML_Models.train_all`
-4. Run API  
+3. Run API  
    `uvicorn Backend.src.api.server:app --reload --port 8000`
-5. Key endpoints (JSON):  
-   - `GET /health/` – heartbeat  
-   - `GET /movie/search?q=toy&limit=10` – title search  
-   - `GET /movie/{movie_id}` – details  
-   - `GET /recommend/similar/{movie_id}?top_n=10` – content-based  
-   - `GET /recommend/model/{model}/{user_id}?top_n=10` – per-model recs (`hybrid`, `svd`, `knn`)  
-   - `GET /recommend/hybrid/{user_id}` – hybrid shortcut
+4. Key endpoints  
+   - `GET /health/` — heartbeat  
+   - `GET /movie/search?q=toy&limit=10` — title search  
+   - `GET /movie/{movie_id}` — details  
+   - `GET /recommend/similar/{movie_id}?top_n=10` — content-based  
+   - `GET /recommend/model/{model}/{user_id}?top_n=10` — per-model recs (`hybrid`, `svd`, `knn`)  
+   - `GET /recommend/hybrid/{user_id}` — hybrid shortcut
 
-## 2) Frontend setup (React, Vite)
+## Frontend setup (React, Vite)
 1. `cd Frontend`
-2. Install deps: `npm install`
-3. Set API base if not localhost:  
-   Create `Frontend/.env` → `VITE_API_BASE=http://127.0.0.1:8000`
-4. Run dev server: `npm run dev` (open shown URL)
-5. Production build: `npm run build` (output in `Frontend/dist`)
+2. `npm install`
+3. If API not on localhost: create `Frontend/.env` with `VITE_API_BASE=http://127.0.0.1:8000`
+4. Dev: `npm run dev` (open shown URL)  
+   Build: `npm run build`
 
 ### Frontend UX
-- Login: enter any existing user_id (from MovieLens data, e.g., `1`) to set personalization context.
-- Home: Netflix-style rows showing Trending, Recommended For You (hybrid), Because You Watched (content-based similar), From viewers like you (collaborative), plus search.
-- Movie detail: title/overview + “More like this” (content-based).
+- Login with any valid `user_id` from the dataset.
+- Home rows: Trending (popularity), Recommended For You (hybrid), Because You Watched (content-based similar), From viewers like you (collaborative), plus search.
+- Movie detail: info + “More like this” (content-based).
 - Theme toggle: light/dark.
 
-## 3) Data & models
-- Data: `Backend/data/processed/final_movies.csv`, `final_ratings.csv` (MovieLens 100K).
-- Pretrained artifacts: `ML_Models/svd`, `ML_Models/knn`, `ML_Models/content_based`.
-- Training scripts (optional rerun):
-  - `python -m ML_Models.svd.train_svd`
-  - `python -m ML_Models.knn.train_knn`
-  - `python -m ML_Models.content_based.train_content`
-  - Or all at once: `python -m ML_Models.train_all`
+## Data & models
+- Processed data: `Backend/data/processed/final_movies.csv`, `final_ratings.csv`.
+- Models: `ML_Models/svd` (SVD factors), `ML_Models/knn` (KNN similarities), `ML_Models/content_based` (TF-IDF + cosine).
+- Training scripts:  
+  - `python -m ML_Models.svd.train_svd`  
+  - `python -m ML_Models.knn.train_knn`  
+  - `python -m ML_Models.content_based.train_content`  
+  - All at once: `python -m ML_Models.train_all`
 
-## 4) Architecture notes
-- Backend owns model selection; frontend only calls APIs and renders results.
-- Content-based uses TF-IDF + cosine similarity on genres/overview.
-- Collaborative includes memory-based KNN (precomputed similarities) and SVD embeddings.
-- Hybrid blends collaborative + content for user-level recommendations.
+## Architecture notes
+- Backend chooses models; frontend only calls APIs.
+- Content-based uses TF-IDF over genres/overview.
+- Collaborative: memory-based KNN + SVD factors.
+- Hybrid blends collaborative + content for user-level recs.
 
-## 5) Troubleshooting
-- 404/422 on `/movie/search`: ensure server restarted after adding the search route.
-- “Failed to fetch” in UI: check API is running and `VITE_API_BASE` points to it.
-- Missing recs for a user/movie: item/user may be absent from trained IDs; try another id.
+## Using a newer MovieLens dataset (20M/25M/32M)
+1. Download `movies.csv`, `ratings.csv`, `links.csv`.
+2. Place them in `Backend/data/ml-32m/` (keep filenames).
+3. Regenerate processed data:  
+   `python Backend/src/preprocess_final.py`
+4. Retrain models on the new data:  
+   `python -m ML_Models.train_all`
+5. Restart the API.
+
+The preprocessing script auto-detects `Backend/data/ml-32m/` and rebuilds the processed files. Content training reads the `genres` column directly, so no extra changes are needed.
+
+## Troubleshooting
+- 404/422 on `/movie/search`: restart the server to load routes.
+- “Failed to fetch” in UI: ensure API is running and `VITE_API_BASE` matches.
+- Missing recs: user/movie may not exist in trained IDs; try another id.
