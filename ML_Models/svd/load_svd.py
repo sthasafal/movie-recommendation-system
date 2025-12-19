@@ -14,7 +14,7 @@ from ML_Models.utils.shared_paths import SVD_DIR
 def load_svd():
     model_path = SVD_DIR / "svd_model.pkl"
     user_emb_path = SVD_DIR / "user_embeddings.npy"
-    item_emb_path = SVD_DIR / "item_embeddings.npy"
+    item_emb_path = SVD_DIR / "movie_embeddings.npy"
     user_ids_path = SVD_DIR / "user_ids.npy"
     movie_ids_path = SVD_DIR / "movie_ids.npy"
 
